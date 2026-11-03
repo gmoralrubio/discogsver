@@ -173,7 +173,7 @@ Estados diferenciados: filtros inválidos, sin resultados de búsqueda, sin cand
 - Ejecutar checks, tests, compilación y recorridos de navegador; revisar también automatización con player simulado porque los vídeos reales cambian.
 - Documentar instalación, credenciales, arranque, conexión, limitaciones, limpieza y resolución de errores.
 
-**Salida:** checklist de aceptación completado con evidencia; limitaciones conocidas explícitas. No publicar ni crear commits sin solicitud.
+**Salida:** checklist de aceptación completado con evidencia; limitaciones conocidas explícitas. Para el desarrollo en ramas, revisión mediante Pull Request y autorizaciones de commits y publicación, seguir [la guía de desarrollo](agents/development.md#feature-branches-and-pull-requests) y [las reglas de commits](commits.md); no crear commits ni publicar sin solicitud.
 
 ## 8. Pruebas y criterios de aceptación
 

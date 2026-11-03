@@ -1,6 +1,6 @@
 # Commit rules
 
-Create focused, reviewable commits using [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/). These rules apply to both human and agent contributions. Agents must not create commits without an explicit user request; permission to commit does not authorize a push or publication.
+Create focused, reviewable commits using [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/). These rules apply to both human and agent contributions. Agents must not create commits without an explicit user request. Before each commit, propose the exact commit message and wait for the user's approval of its text; approval of the text alone does not authorize committing. Permission to commit does not authorize a push, Pull Request, or publication. Develop features on dedicated branches and merge into `main` only through a Pull Request as described in [the development workflow](agents/development.md#feature-branches-and-pull-requests).
 
 ## Quick checklist
 
@@ -12,7 +12,7 @@ Before creating a commit:
 - [ ] Inspect `git diff --cached` and confirm that every staged change belongs in the commit.
 - [ ] Run the applicable checks defined in [tools.md](tools.md).
 - [ ] Confirm that no secrets, local caches, logs, or unintended generated artifacts are included.
-- [ ] Write an English commit message that describes the actual staged change.
+- [ ] Propose an English commit message that describes the actual staged change and obtain the user's approval of its exact text before committing.
 
 Do not describe failed, skipped, or pending checks as successful. Resolve failed required checks before committing; if a required check cannot run, report the missing evidence and ask for direction rather than silently bypassing it.
 
