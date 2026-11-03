@@ -1,0 +1,21 @@
+{
+  "name": "backend",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vpx src/main.ts --watch",
+    "build": "tsc -p tsconfig.json",
+    "check": "vp check",
+    "start": "node dist/main.js"
+  },
+  "dependencies": {
+    "express": "catalog:"
+  },
+  "devDependencies": {
+    "@types/express": "catalog:",
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vite-plus": "catalog:"
+  }
+}

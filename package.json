@@ -1,0 +1,26 @@
+{
+  "name": "discogsver",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "ready": "vp run -r check && vp run -r test && vp run -r build",
+    "dev": "vp run --filter frontend --filter backend dev",
+    "build": "vp run -r build",
+    "test": "vp run -r test",
+    "check": "vp run -r check"
+  },
+  "devDependencies": {
+    "vite-plus": "catalog:"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "12.16.1",
+      "onFail": "download"
+    }
+  },
+  "engines": {
+    "node": ">=22.18.0"
+  }
+}
