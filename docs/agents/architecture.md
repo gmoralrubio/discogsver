@@ -4,10 +4,9 @@ Read when changing domain logic, use cases, adapters, or dependency wiring.
 
 ## Dependency Boundaries
 
-- Use **hexagonal architecture** with the tools and configuration status defined exclusively in [tools.md](../tools.md). Do not infer installed dependencies from planning documents.
-- Separate domain logic and use cases from HTTP, Discogs, SQLite, and YouTube adapters. Dependencies point toward the domain, not toward providers.
-- Keep domain logic and use cases testable with test doubles: inject the clock, randomness, catalog, cache, credentials, and player as appropriate.
-- In the frontend, React and the IFrame are adapters; isolate queue rules and playback state from their implementation details.
+- Prefer clear separation between responsibilities when it helps keep code understandable and testable; avoid imposing a particular architecture before requirements justify it.
+- Keep business rules independent of framework or provider details where practical, and use test doubles when external dependencies make deterministic tests difficult.
+- Treat the existing repository structure as scaffold, not as a settled architecture decision.
 
 ## Wiring and Configuration Ownership
 

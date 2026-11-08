@@ -11,7 +11,7 @@ Read when implementing, testing, delivering changes, or considering delegation. 
 ## Documentation and Acceptance
 
 - Update documentation when a contract, behavior, or decision changes.
-- Complete the acceptance matrix in [the v1 plan](../PLAN_V1.md#8-pruebas-y-criterios-de-aceptación). Follow [`tools.md`](../tools.md) for test tools, command selection, and verification procedures; do not maintain a second tool or command list here.
+- Define verification from the behavior being changed and the checks actually configured in the repository. Follow [`tools.md`](../tools.md) for current tool and command information; do not treat planned or unconfigured checks as available.
 - Review the final diff and summarize changes, checks, and remaining risks.
 
 ## Feature Branches and Pull Requests

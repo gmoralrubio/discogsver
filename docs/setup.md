@@ -2,7 +2,7 @@
 
 > Generic Vite+ setup reference. Read [tools.md](tools.md) for current tool decisions and command status. The selected frontend is React with Vite/Vite+; the Node backend needs its own build/start configuration. Use the applicable flow below only when implementation is requested and verify current versions.
 
-Paths and commands below refer to the target project workspace, not `docs/`. For Discogsver, the existing workspace is the repository root with applications under `apps/`; do not scaffold over the existing applications. [PLAN_V1.md](PLAN_V1.md) owns v1 requirements and acceptance criteria.
+Paths and commands below refer to the target project workspace, not `docs/`. For Discogsver, the existing workspace is the repository root with applications under `apps/`; do not scaffold over existing applications. Product scope is pending redefinition; this generic reference does not prescribe project requirements.
 
 I want to use Vite+ in my project. Vite+ is the unified toolchain for the web behind the `vp` CLI — one tool combining Vite, Rolldown, Vitest, tsdown, Oxlint, Oxfmt, and Vite Task, plus runtime and package-manager management.
 
