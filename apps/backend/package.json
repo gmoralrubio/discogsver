@@ -7,10 +7,12 @@
     "dev": "vpx src/main.ts --watch",
     "build": "tsc -p tsconfig.json",
     "check": "vp check",
+    "test": "vp test run src",
     "start": "node dist/main.js"
   },
   "dependencies": {
-    "express": "catalog:"
+    "express": "catalog:",
+    "oauth-1.0a": "catalog:"
   },
   "devDependencies": {
     "@types/express": "catalog:",
