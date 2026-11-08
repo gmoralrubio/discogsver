@@ -1,4 +1,13 @@
+import { fileURLToPath } from 'node:url';
+
 import { createApp } from './app.js';
+
+try {
+  process.loadEnvFile(fileURLToPath(new URL('../.env', import.meta.url)));
+} catch (error) {
+  if (!(error instanceof Error) || !('code' in error) || error.code !== 'ENOENT')
+    throw error;
+}
 
 const host = process.env.HOST ?? '127.0.0.1';
 const port = Number(process.env.PORT ?? 3100);
