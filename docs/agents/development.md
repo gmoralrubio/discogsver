@@ -2,6 +2,12 @@
 
 Read when implementing, testing, delivering changes, or considering delegation. The [root guide](../../AGENTS.md#always-apply) contains working-tree preservation and deletion, commit, and publishing authorization rules.
 
+## Formatting and Readability
+
+- Keep every maintained project file correctly formatted and readable, not only files changed in a task. Use the configured formatter where it supports the file type and follow that format's syntax and conventions for other files.
+- Separate distinct logical blocks of code—such as imports, declarations, control-flow branches, and independent test cases—with blank lines. Keep tightly related statements together; do not add blank lines mechanically between every statement or inside formats where whitespace is significant.
+- Before delivery, audit the maintained files for formatting and readability, and run the configured formatting check. Do not rewrite generated artifacts or lockfiles solely to satisfy source-formatting rules.
+
 ## Documentation and Acceptance
 
 - Update documentation when a contract, behavior, or decision changes.

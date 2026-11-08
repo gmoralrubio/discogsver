@@ -1,4 +1,4 @@
-import { defineConfig } from "vite-plus";
+import { defineConfig } from 'vite-plus';
 
 export default defineConfig({
   pack: {
@@ -9,7 +9,7 @@ export default defineConfig({
       resolveDepSubpath: true,
     },
     dts: {
-      generator: "tsgo",
+      generator: 'tsgo',
     },
     exports: true,
   },
