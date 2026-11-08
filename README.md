@@ -1,9 +1,10 @@
 # Discogsver
 
-Radio de descubrimiento musical para uso personal local, con React, Vite+ y Node. El workspace separa `apps/frontend` (React + Vite) y `apps/backend` (Node + Express). **La radio y las integraciones con Discogs/YouTube todavía no están implementadas.** Existe una base técnica mínima; la validación de viabilidad de la fase 0 sigue pendiente.
+Discogsver is an evolving software project. Its product scope and requirements are being redefined; do not treat previous plans or scaffold choices as product decisions. The repository currently contains a pnpm workspace with a React/Vite frontend and a Node/Express backend; inspect the code and configuration for the verified implementation state.
 
-- [Arranque, comprobaciones y estructura](docs/getting-started.md).
-- [Plan de v1: requisitos, decisiones, fases y aceptación](docs/PLAN_V1.md).
-- [Herramientas, configuración y comandos](docs/tools.md).
-- [Referencia genérica de configuración de Vite+](docs/setup.md).
-- [Guía para agentes](AGENTS.md).
+- [Minimal playback plan (exploration draft)](docs/minimal-plan.md).
+- A temporary [Discogs OAuth read-only proof](docs/discogs-oauth.md) covers an authenticated search; this does not mean the radio or player is implemented.
+- [Getting started, checks, and structure](docs/getting-started.md).
+- [Tools, configuration, and commands](docs/tools.md).
+- [Generic Vite+ configuration reference](docs/setup.md).
+- [Agent guide](AGENTS.md).

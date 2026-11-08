@@ -1,6 +1,6 @@
 # Agent Guide — Discogsver
 
-Discogsver is a music discovery radio for **personal local use**, not a public or multi-user service.
+Discogsver is an evolving software project. Product scope and requirements are being redefined; do not assume a product direction beyond the verified repository scaffold.
 
 ## Always Apply
 
@@ -12,8 +12,7 @@ Discogsver is a music discovery radio for **personal local use**, not a public o
 
 ## Sources of Truth
 
-- Read [docs/PLAN_V1.md](docs/PLAN_V1.md) before planning or implementing: it is the sole authority for v1 requirements, decisions, phases, and acceptance criteria. Follow its [phase 0 gate](docs/PLAN_V1.md#fase-0--resolver-elegibilidad-y-verificar-contratos-externos) before progressing with the product.
-- V1 is planned, not necessarily implemented or validated. Check the working tree and available evidence before claiming that a phase is complete.
+- Product scope and requirements are pending redefinition. Confirm product decisions with the user rather than treating prior plans or scaffold choices as requirements.
 - Read [docs/tools.md](docs/tools.md) before changing dependencies, scripts, build configuration, tests, containers, or observability. It owns tool choices, command availability, and verification procedures.
 
 ## Workspace Commands
@@ -33,10 +32,10 @@ See [docs/tools.md](docs/tools.md) for configuration status and the full command
 
 | Task                                                             | Instructions                                          |
 | ---------------------------------------------------------------- | ----------------------------------------------------- |
-| Product behavior, filters, release identity, or scope            | [Product](docs/agents/product.md)                     |
+| Product behavior or scope                                        | [Product](docs/agents/product.md)                     |
 | Domain, use cases, adapters, or dependency wiring                | [Architecture](docs/agents/architecture.md)           |
 | TypeScript code or compiler configuration                        | [TypeScript](docs/agents/typescript.md)               |
-| Discogs contracts, selection, eligibility, or caching            | [Discogs and cache](docs/agents/discogs-and-cache.md) |
-| Player, queue, tuning sessions, or interface states              | [Playback](docs/agents/playback.md)                   |
+| External provider integrations or caching                        | [Discogs and cache](docs/agents/discogs-and-cache.md) |
+| Playback or interface behavior                                   | [Playback](docs/agents/playback.md)                   |
 | Local access, OAuth, credentials, provider writes, or live tests | [Security](docs/agents/security.md)                   |
 | Implementation, testing, delivery, or delegation                 | [Development](docs/agents/development.md)             |

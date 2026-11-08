@@ -1,6 +1,6 @@
 # Discogsver — Guía de arranque
 
-Discogsver es una radio local de descubrimiento musical. El workspace usa pnpm y Vite+; las aplicaciones están separadas en un frontend React y un backend Node/Express. La radio y las integraciones con Discogs/YouTube todavía no están implementadas.
+Discogsver es un proyecto en evolución cuya dirección y requisitos de producto se están redefiniendo. El workspace actual usa pnpm y Vite+; las aplicaciones están separadas en un frontend React y un backend Node/Express. Consulta el código y la configuración para conocer el estado implementado.
 
 ## Requisitos
 
@@ -72,17 +72,12 @@ apps/
 packages/               Código compartido solo cuando exista una responsabilidad clara
 ```
 
-## Reglas de arquitectura
+## Límites de la base actual
 
-- El frontend no contiene credenciales, OAuth, SQLite ni clientes directos de Discogs.
-- Express es un adaptador HTTP; los casos de uso y la lógica de dominio no dependen de Express.
-- `app.ts` se puede probar sin abrir un puerto; `main.ts` se ocupa exclusivamente del proceso servidor.
-- El frontend usa `/api` y el proxy de Vite en desarrollo; no se añade CORS abierto como solución de conveniencia.
-- `packages/` no debe convertirse en un cajón genérico. Añadir paquetes compartidos solo para contratos, dominio o utilidades con una responsabilidad concreta.
-- Durante el desarrollo hay dos procesos; para la ejecución empaquetada se prevé un único servidor Node que sirva API y frontend compilado.
+- Trata la estructura y los límites actuales como scaffold, no como decisiones de arquitectura o producto inmutables.
+- Mantén secretos fuera del frontend y evita abrir acceso de red más allá de lo necesario.
+- Conserva separación clara entre responsabilidades cuando facilite pruebas y mantenimiento; confirma las decisiones que impliquen nuevas capas o topología.
 
-## Límites de esta entrega
+## Estado del producto
 
-- Sin búsqueda, reproducción, caché SQLite, OAuth ni operaciones de wantlist.
-- Tailwind/shadcn, Playwright, Docker y Sentry están elegidos, pero pendientes de configuración.
-- La documentación de requisitos sigue en [PLAN_V1.md](PLAN_V1.md); las herramientas y comandos, en [tools.md](tools.md).
+El alcance del producto y sus requisitos están pendientes de redefinición. Existe una prueba temporal de OAuth de Discogs que valida una búsqueda autenticada de solo lectura; consulta la [guía de la prueba](discogs-oauth.md). Esto no significa que la radio o el reproductor estén implementados. No asumas funciones, integraciones o herramientas futuras a partir de referencias antiguas; consulta [tools.md](tools.md) para la configuración real y valida nuevas decisiones con la persona usuaria.
