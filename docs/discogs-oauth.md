@@ -1,6 +1,6 @@
 # Discogs OAuth read-only proof
 
-The backend exposes a temporary OAuth 1.0a connection flow to confirm that Discogs credentials can authorize one private, read-only search. It does not save access tokens or add radio, player, or wantlist behavior.
+The backend exposes a temporary OAuth 1.0a connection flow to confirm that Discogs credentials can authorize one private, read-only search. The optional `?session=1` mode retains credentials in memory for a bounded browser session. Neither mode adds radio, player, or wantlist behavior.
 
 ## Local setup
 
@@ -15,6 +15,8 @@ Reports include release IDs and public Discogs links, bounded track titles, vide
 
 For manual playback evidence, select links from the report and open the official visible YouTube player yourself. Record whether playback was visibly observed; do not infer success from metadata. Distinguish player errors: `100` indicates unavailable video; `101`/`150` indicates embedding disabled; `153` indicates missing/refused client identification; autoplay may be blocked by browser policy. The player viewport must be at least 200×200 pixels; 480×270 is recommended. See [YouTube player error codes](https://developers.google.com/youtube/iframe_api_reference#onError) and [player parameters](https://developers.google.com/youtube/player_parameters). Live OAuth sampling and playback remain owner-operated and are not part of automated tests.
 
-The backend also accepts optional `DISCOGS_REQUEST_TOKEN_URL`, `DISCOGS_AUTH_URL`, and `DISCOGS_ACCESS_TOKEN_URL` settings, but validates them against the official Discogs HTTPS endpoints. Request tokens are browser-bound, short-lived, capacity-limited, and single-use. This proof intentionally does not persist access tokens; start a new connection for another run.
+The backend also accepts optional `DISCOGS_REQUEST_TOKEN_URL`, `DISCOGS_AUTH_URL`, and `DISCOGS_ACCESS_TOKEN_URL` settings, but validates them against the official Discogs HTTPS endpoints. Request tokens are browser-bound, short-lived, capacity-limited, and single-use. The default proof and `validation=candidates` do not retain access tokens; start a new connection for another run.
+
+To opt into a temporary in-memory session, start OAuth at `/api/discogs/connect?session=1`. The callback returns only `{ "connected": true }` and sets an opaque HttpOnly cookie. `GET /api/discogs/session` reports `{ "connected": true|false }`; `DELETE /api/discogs/session` disconnects locally and requires a same-origin `Origin` header. Session-mode initiation accepts the local frontend/backend origins in development; a top-level navigation without Origin is accepted only with a non-cross-site Fetch Metadata value. Production checks the actual HTTPS request and exact request origin, without trusting forwarded headers. Sessions expire after 30 minutes idle or 8 hours absolute and are lost on backend restart. Production cookies are Secure. The existing fixed local OAuth callback means this code is not production deployment guidance until a production HTTPS callback topology is explicitly configured. This does not revoke authorization at Discogs.
 
 Do not paste credentials, OAuth tokens, verifier values, or provider response details into logs or documentation. Tests use simulated provider responses and never contact Discogs.

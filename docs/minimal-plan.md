@@ -1,6 +1,6 @@
 # Minimal playback plan — exploration draft
 
-**Status:** Exploration draft with agreed prototype decisions, not a complete implementation specification. The bounded OAuth/candidate proof exists; the radio, replenishment, and temporary application session described below are not implemented.
+**Status:** Exploration draft with agreed prototype decisions, not a complete implementation specification. The bounded OAuth/candidate proof and first backend-only temporary OAuth session slice exist; radio and replenishment remain unimplemented.
 
 ## Proposed experience
 
@@ -56,13 +56,13 @@ The agreed application-session policy is:
 - An explicit disconnect immediately removes the local session and its credentials. This is not equivalent to revoking the application's authorization at Discogs.
 - Identify the session with an opaque **HttpOnly** cookie containing no OAuth credentials. Production requires **Secure** cookies over HTTPS. These application timeouts do not describe the lifetime of Discogs access tokens.
 
-This session is not implemented. The existing proof discards access credentials after its callback finishes. Cookie binding and other protections, capacity, and cleanup mechanics still need to be specified and verified before implementation; this decision does not authorize permanent credential storage.
+The first backend slice is implemented: `/api/discogs/connect?session=1` opts into a browser-bound, opaque HttpOnly cookie; `/api/discogs/session` reports connection state and DELETE disconnects locally. Credentials remain in memory only, with 30-minute idle and 8-hour absolute expiry, bounded capacity and timed cleanup. The default one-result proof and `validation=candidates` continue to discard credentials. No player, queue, radio, replenishment, UI, or persistent storage is included. Production deployment still requires a real HTTPS topology; the fixed local OAuth callback is not production deployment guidance.
 
 ## Remaining decisions before implementation
 
-1. **Complete the temporary-session design:** Specify browser binding and remaining cookie protections, capacity, and cleanup mechanics for the agreed 30-minute idle / 8-hour absolute policy, preserving credential isolation and the existing OAuth protections.
+1. **Prepare production deployment separately:** Define an HTTPS callback and host topology before enabling production sessions; the current callback remains fixed to the local prototype address.
 2. **Define player failure handling:** Distinguish an unavailable candidate from blocked autoplay, decide bounded skip behavior, and verify actual video/audio playback with the official visible player. Availability on YouTube or in Discogs metadata is insufficient.
 3. **Review provider constraints:** Confirm current Discogs and YouTube terms, attribution, metadata/image usage, and quota handling before product integration. The sampled presence of cover metadata does not establish image delivery or usage rights.
-4. **Specify the first implementation slice:** Use the agreed decisions and observed limits without promising 20 playable items or a response time. Radio UI, queue state, and session/replenishment implementation remain future work.
+4. **Specify the next product slice:** Use the agreed decisions and observed limits without promising 20 playable items or a response time. Radio UI, queue state, and replenishment remain future work; the backend session slice is implemented and has passed independent functional verification within this backend-only prototype scope.
 
 OAuth connection is required for Discogs reads; no wantlist operations, persistent cache, additional playback provider, deployment topology, or further product features have been decided here.

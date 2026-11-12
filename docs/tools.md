@@ -12,7 +12,7 @@ Unless stated otherwise, code and configuration paths are relative to the reposi
 
 The repository contains a pnpm workspace with `apps/frontend` (React/Vite), `apps/backend` (Node/Express), and `packages/utils`. Workspace scripts and package versions are in the root `package.json`, package globs in `pnpm-workspace.yaml`, and resolved dependencies in `pnpm-lock.yaml`. Inspect these files for current details; do not assume unconfigured integrations or features.
 
-The backend currently contains a temporary Discogs OAuth 1.0a proof that completes a callback and performs one authenticated read-only search; see [the proof guide](discogs-oauth.md). This does not implement radio or playback behavior. Beyond this proof, provider integrations, metadata handling, caching, and other product choices remain undecided; do not infer approved future choices from old plans.
+The backend currently contains a temporary Discogs OAuth 1.0a proof, plus an opt-in in-memory session mode with HTTP status and local disconnect routes; see [the proof guide](discogs-oauth.md). This does not implement radio or playback behavior. Beyond this proof, provider integrations, metadata handling, caching, and other product choices remain undecided; do not infer approved future choices from old plans.
 
 ### Global CLI Availability
 
@@ -77,7 +77,7 @@ Keep shared lint/format configuration and package scripts aligned with actual wo
 
 ## Tests
 
-Use the Vitest bundled with `vite-plus` where configured; inspect the workspace config for actual coverage and environments. Keep tests deterministic and avoid live external services unless the user explicitly authorizes them.
+Use the Vitest bundled with `vite-plus` where configured; inspect the workspace config for actual coverage and environments. Keep tests deterministic and avoid live external services unless the user explicitly authorizes them. The backend session TLS test uses the installed `openssl` CLI to generate a loopback-only self-signed certificate in a temporary directory; it requires no network access or external credentials.
 
 | Command                            | Purpose                                                               |
 | ---------------------------------- | --------------------------------------------------------------------- |

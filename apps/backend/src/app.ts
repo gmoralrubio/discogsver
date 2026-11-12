@@ -7,6 +7,7 @@ type AppOptions = {
   env?: OAuthEnvironment;
   fetchImpl?: FetchImplementation;
   wait?: (milliseconds: number) => Promise<void>;
+  now?: () => number;
 };
 
 export function createApp(options: AppOptions = {}) {
@@ -15,6 +16,7 @@ export function createApp(options: AppOptions = {}) {
     env: options.env ?? process.env,
     fetchImpl: options.fetchImpl ?? fetch,
     wait: options.wait,
+    now: options.now,
   });
 
   app.get('/api/health', (_request: Request, response: Response) => {
@@ -25,6 +27,14 @@ export function createApp(options: AppOptions = {}) {
     oauth
       .connect(request, response)
       .catch(() => response.status(502).json({ error: 'Discogs OAuth request failed' }));
+  });
+
+  app.get('/api/discogs/session', (request: Request, response: Response) => {
+    oauth.sessionStatus(request, response);
+  });
+
+  app.delete('/api/discogs/session', (request: Request, response: Response) => {
+    oauth.disconnect(request, response);
   });
 
   app.get('/api/discogs/callback', (request: Request, response: Response) => {
