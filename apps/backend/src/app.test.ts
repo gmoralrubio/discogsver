@@ -67,6 +67,80 @@ describe('Discogs OAuth read-only proof', () => {
     }
   });
 
+  it('runs the opt-in bounded candidate validation through the public OAuth flow', async () => {
+    const calls: Array<{ url: string; init?: RequestInit }> = [];
+    const fetchImpl = vi.fn(async (input: URL | RequestInfo, init?: RequestInit) => {
+      const url = requestUrl(input);
+      calls.push({ url, init });
+      if (url.endsWith('/oauth/request_token')) {
+        return new Response(
+          'oauth_token=request-token&oauth_token_secret=request-secret&oauth_callback_confirmed=true',
+        );
+      }
+      if (url.endsWith('/oauth/access_token')) {
+        return new Response('oauth_token=access-token&oauth_token_secret=access-secret');
+      }
+      if (url.includes('/database/search')) {
+        return Response.json({
+          results: [{ id: url.includes('Reggae') ? 1 : url.includes('Techno') ? 2 : 3 }],
+        });
+      }
+      return Response.json({
+        id: Number(url.split('/').pop()),
+        title: 'Artist - Album',
+        year: 2020,
+        tracklist: [{ title: 'Known Song' }],
+        videos: [
+          {
+            uri: 'https://www.youtube.com/watch?v=AbC_123-xYz',
+            title: 'Artist - Known Song (Official Video)',
+          },
+        ],
+        images: [{ uri: 'https://example.invalid/cover.jpg' }],
+        privateField: 'must not leak',
+      });
+    });
+    const { baseUrl, server } = await startApp(fetchImpl, undefined, async () => {});
+
+    try {
+      const begin = await fetch(`${baseUrl}/api/discogs/connect?validation=candidates`, {
+        redirect: 'manual',
+      });
+      const state = new URL(begin.headers.get('location')!).searchParams.get(
+        'oauth_token',
+      );
+      const cookie = begin.headers.get('set-cookie')?.split(';')[0] ?? '';
+      const callback = await fetch(
+        `${baseUrl}/api/discogs/callback?oauth_token=${state}&oauth_verifier=approved`,
+        { headers: { cookie } },
+      );
+      expect(callback.status).toBe(200);
+      const result = await callback.json();
+      expect(result.validation).toMatchObject({
+        dataRequests: 6,
+        partial: true,
+        categories: [
+          { name: 'Reggae', inspected: 1, withVideos: 1, apparentTrackMatches: 1 },
+          { name: 'Techno', inspected: 1, withVideos: 1, apparentTrackMatches: 1 },
+          { name: 'Punk', inspected: 1, withVideos: 1, apparentTrackMatches: 1 },
+        ],
+      });
+      expect(calls.slice(2).every(({ init }) => init?.method === 'GET')).toBe(true);
+      expect(calls.filter(({ url }) => url.includes('/database/search'))).toHaveLength(3);
+      expect(
+        calls.map(({ url }) => url).filter((url) => url.includes('/database/search')),
+      ).toEqual([
+        expect.stringContaining('genre=Reggae'),
+        expect.stringContaining('style=Techno'),
+        expect.stringContaining('style=Punk'),
+      ]);
+      expect(JSON.stringify(result)).not.toContain('privateField');
+      expect(JSON.stringify(result)).not.toContain('access-secret');
+    } finally {
+      await stopServer(server);
+    }
+  });
+
   it.each([
     ['missing browser cookie', undefined],
     ['mismatched browser cookie', 'discogs_oauth_state=wrong'],

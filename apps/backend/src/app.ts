@@ -3,13 +3,18 @@ import express, { type Request, type Response } from 'express';
 import { createDiscogsOAuth } from './discogs-oauth.js';
 import type { FetchImplementation, OAuthEnvironment } from './discogs-provider.js';
 
-type AppOptions = { env?: OAuthEnvironment; fetchImpl?: FetchImplementation };
+type AppOptions = {
+  env?: OAuthEnvironment;
+  fetchImpl?: FetchImplementation;
+  wait?: (milliseconds: number) => Promise<void>;
+};
 
 export function createApp(options: AppOptions = {}) {
   const app = express();
   const oauth = createDiscogsOAuth({
     env: options.env ?? process.env,
     fetchImpl: options.fetchImpl ?? fetch,
+    wait: options.wait,
   });
 
   app.get('/api/health', (_request: Request, response: Response) => {

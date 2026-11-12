@@ -2,6 +2,7 @@ import { randomBytes, timingSafeEqual } from 'node:crypto';
 
 import type { Request, Response } from 'express';
 
+import { sampleDiscogsCandidates } from './discogs-candidates.js';
 import {
   createDiscogsProvider,
   type FetchImplementation,
@@ -13,8 +14,17 @@ const cookieName = 'discogs_oauth_state';
 const stateTtlMs = 5 * 60 * 1000;
 const maxStates = 100;
 
-type PendingState = { browser: string; secret: string; expiresAt: number };
-type OAuthOptions = { env: OAuthEnvironment; fetchImpl: FetchImplementation };
+type PendingState = {
+  browser: string;
+  secret: string;
+  expiresAt: number;
+  validation: boolean;
+};
+type OAuthOptions = {
+  env: OAuthEnvironment;
+  fetchImpl: FetchImplementation;
+  wait?: (milliseconds: number) => Promise<void>;
+};
 
 function cookieValue(request: Request): string | undefined {
   const header = request.headers.cookie;
@@ -34,7 +44,7 @@ function equalSecret(left: string, right: string): boolean {
   );
 }
 
-export function createDiscogsOAuth({ env: environment, fetchImpl }: OAuthOptions) {
+export function createDiscogsOAuth({ env: environment, fetchImpl, wait }: OAuthOptions) {
   const provider = createDiscogsProvider({ environment, fetchImpl });
   const pendingStates = new Map<string, PendingState>();
   let inFlightConnections = 0;
@@ -46,7 +56,7 @@ export function createDiscogsOAuth({ env: environment, fetchImpl }: OAuthOptions
   }
 
   return {
-    async connect(_request: Request, response: Response): Promise<void> {
+    async connect(request: Request, response: Response): Promise<void> {
       if (!provider.configured) {
         response.status(503).json({ error: 'Discogs OAuth is not configured' });
         return;
@@ -75,6 +85,7 @@ export function createDiscogsOAuth({ env: environment, fetchImpl }: OAuthOptions
           browser,
           secret: temporaryToken.secret,
           expiresAt: now + stateTtlMs,
+          validation: request.query.validation === 'candidates',
         });
 
         response.cookie(cookieName, browser, {
@@ -139,6 +150,17 @@ export function createDiscogsOAuth({ env: environment, fetchImpl }: OAuthOptions
 
       if (!accessCredentials) {
         response.status(502).json({ error: 'Discogs OAuth exchange failed' });
+        return;
+      }
+
+      if (state.validation) {
+        const report = await sampleDiscogsCandidates(
+          fetchImpl,
+          provider.client(),
+          accessCredentials,
+          wait,
+        );
+        response.json({ connected: true, validation: report });
         return;
       }
 

@@ -30,8 +30,9 @@ export function authorization(init?: RequestInit): string {
 export async function startApp(
   fetchImpl: typeof fetch,
   appEnvironment: typeof environment = environment,
+  wait?: (milliseconds: number) => Promise<void>,
 ) {
-  const app = createApp({ env: appEnvironment, fetchImpl });
+  const app = createApp({ env: appEnvironment, fetchImpl, wait });
   const server = await new Promise<Server>((resolve) => {
     const listeningServer = app.listen(0, '127.0.0.1', () => resolve(listeningServer));
   });
