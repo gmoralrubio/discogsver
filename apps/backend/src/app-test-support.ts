@@ -2,6 +2,7 @@ import type { Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
 
 import { createApp } from './app.js';
+import type { OAuthEnvironment } from './discogs-provider.js';
 
 export const environment = {
   DISCOGS_CLIENT_KEY: 'test-consumer-key',
@@ -29,9 +30,11 @@ export function authorization(init?: RequestInit): string {
 
 export async function startApp(
   fetchImpl: typeof fetch,
-  appEnvironment: typeof environment = environment,
+  appEnvironment: OAuthEnvironment = environment,
+  wait?: (milliseconds: number) => Promise<void>,
+  now?: () => number,
 ) {
-  const app = createApp({ env: appEnvironment, fetchImpl });
+  const app = createApp({ env: appEnvironment, fetchImpl, wait, now });
   const server = await new Promise<Server>((resolve) => {
     const listeningServer = app.listen(0, '127.0.0.1', () => resolve(listeningServer));
   });

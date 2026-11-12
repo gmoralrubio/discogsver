@@ -1,10 +1,10 @@
 # Minimal playback plan — exploration draft
 
-**Status:** Product exploration, not an implementation commitment. This draft records the current direction and the evidence needed before deciding what to build. The existing workspace is a scaffold, not proof that this flow works.
+**Status:** Exploration draft with agreed prototype decisions, not a complete implementation specification. The bounded OAuth/candidate proof and first backend-only temporary OAuth session slice exist; radio and replenishment remain unimplemented.
 
 ## Proposed experience
 
-1. Connect a Discogs account using **OAuth 1.0a** before making authenticated Discogs requests. A temporary [read-only proof](discogs-oauth.md) already implements the OAuth callback and one authenticated search; the owner reports one real authenticated search before the structural refactor. The owner completed that OAuth flow in a browser; it has not been repeated live after the refactor. The radio interface and embedded playback remain unvalidated.
+1. Connect a Discogs account using **OAuth 1.0a** before making authenticated Discogs requests. The owner completed the current [read-only proof](discogs-oauth.md) in a browser and supplied a successful bounded candidate report for all three categories. This validates the experiment, not an implemented radio.
 2. Choose one of three fixed options: **Reggae**, **Techno**, or **Punk**.
 3. Search Discogs for releases in that category. Request details for candidate releases and consider their associated videos.
 4. Build a queue of **up to 20 distinct videos** that appear to contain individual songs listed in the associated release's tracklist. One release may contribute several songs. If fewer qualify, show the available results rather than treating the search as a failure.
@@ -18,11 +18,51 @@
 - An associated video must appear to be one song from the release tracklist, not a full album, mix, or unrelated song. Trust the Discogs association for release identity; do not attempt to prove that the audio is the exact recording or pressing. Avoid duplicate video links. This is an intended selection rule, not a validated classifier.
 - A vinyl release with multiple tracks can appear in search and can supply several queue items. The search is **not restricted to vinyl**.
 
-## Next steps before implementation
+## Validation evidence
 
-1. **Validate candidate yield:** With small, bounded searches for each option, record how many releases must be inspected, how many have associated videos, how many seem to match individual tracklist songs, and how many distinct candidates remain. A preliminary sample found releases with no videos and duplicate video links; it does not establish the yield of a 20-item queue.
-2. **Validate playback:** Check that selected YouTube links actually allow playback in a visible official embed, and identify what the UI can do when a video is unavailable or playback is blocked. Discogs video metadata alone does not prove playback availability.
-3. **Check metadata and provider constraints:** Check which cover and metadata fields are reliably present; review current Discogs and YouTube terms, attribution, and request limits before selecting an integration approach. The OAuth callback and one authenticated read are already implemented in the temporary proof described above; further integration choices remain undecided.
-4. **Agree on limits and behavior from evidence:** Decide a bounded search budget and what the user sees when it runs out. Then revise this draft into a minimal implementable plan; do not promise 20 results or a response time before measuring.
+The owner supplied a live report with 33 data requests, 10 inspected releases per category, no partial stop, and cover metadata present for all 30 releases. Manual per-release ID counts were reconciled with the report's aggregate counts:
+
+| Observation                                     | Reggae | Techno | Punk |
+| ----------------------------------------------- | -----: | -----: | ---: |
+| Releases with video links                       |      9 |      8 |    7 |
+| Distinct YouTube IDs, including non-candidates  |    111 |     44 |   30 |
+| Distinct IDs with an apparent track-title match |     84 |     30 |   17 |
+
+These are first-page, non-random results, not distinct songs or verified playable videos. The proof's `apparentTrackMatches` counts occurrences, including duplicate IDs; it is not the distinct-ID count above. Title matching has false positives and negatives, including punctuation differences, repeated track titles, and videos containing multiple songs. The Punk result `Busted! (FULL 7´´ 1988)` is suspect despite its apparent match; excluding it leaves 16 apparent IDs. Candidate counts do not establish that a 20-item queue can be played.
+
+For three selected videos, the owner reported that `0RIegs2v0h4` was available on YouTube but unavailable in the iframe, while `TT5Iqn6q69Q` and `SONK_AT_L7g` were available in the iframe. No exact error code was supplied for the failure, and sustained audio/video playback was not explicitly confirmed. This is initial embed-availability evidence, not a general playback guarantee.
+
+## Agreed replenishment behavior
+
+- Search the selected category with pages of up to **100 releases**, then inspect release details in **blocks of 10**. Page size is not the number of playable songs.
+- Automatically replenish an exhausted candidate queue, advancing through uninspected releases and then subsequent pages instead of repeating the same page.
+- Inspect at most **30 releases per automatic replenishment**, stopping earlier when the queue reaches **20 candidates**. This is a release-inspection budget, not 30 playable results; search-page requests also consume quota.
+- Avoid adding video IDs already encountered or discarded during the browser session. Different video IDs may still represent the same song.
+- When the budget is exhausted, keep any available results and offer **Search more** for another bounded batch. Do not loop indefinitely or promise 20 results.
+- Respect Discogs response quota headers and provider errors. The experimental proof still uses `per_page=10` and at most 33 data requests across three categories; it does not implement this replenishment behavior.
+
+Discogs documents a maximum `per_page` of 100 and an authenticated rate limit of 60 requests per minute, subject to change; see [pagination](https://www.discogs.com/developers/#page:home,header:home-pagination) and [rate limiting](https://www.discogs.com/developers/#page:home,header:home-rate-limiting). A page of 100 search results requires one search request, but inspecting all of them can require another 100 release-detail requests.
+
+## Agreed temporary OAuth session
+
+For the first prototype, retain OAuth credentials **only in backend memory**, associated with a browser session, so later replenishment requests can use them. Never send them to the frontend or persist them to disk. Require reconnection after session expiry or a backend restart.
+
+The agreed application-session policy is:
+
+- Expire after **30 minutes of inactivity**, measured from valid browser requests to the application. Candidate and replenishment requests count as activity; internal backend work does not renew the session by itself.
+- Expire after an **absolute maximum of 8 hours** from OAuth connection, even with activity. Do not send periodic keepalive requests solely to extend the session or renew it silently.
+- On expiry, remove the session and its credentials from backend memory and offer **Reconnect with Discogs** when another Discogs request is needed. A backend restart also requires reconnection.
+- Do not interrupt an already playing video or automatically erase the visible queue when the Discogs session expires. YouTube playback alone does not necessarily produce requests to our backend, so expiry can occur while listening.
+- An explicit disconnect immediately removes the local session and its credentials. This is not equivalent to revoking the application's authorization at Discogs.
+- Identify the session with an opaque **HttpOnly** cookie containing no OAuth credentials. Production requires **Secure** cookies over HTTPS. These application timeouts do not describe the lifetime of Discogs access tokens.
+
+The first backend slice is implemented: `/api/discogs/connect?session=1` opts into a browser-bound, opaque HttpOnly cookie; `/api/discogs/session` reports connection state and DELETE disconnects locally. Credentials remain in memory only, with 30-minute idle and 8-hour absolute expiry, bounded capacity and timed cleanup. The default one-result proof and `validation=candidates` continue to discard credentials. No player, queue, radio, replenishment, UI, or persistent storage is included. Production deployment still requires a real HTTPS topology; the fixed local OAuth callback is not production deployment guidance.
+
+## Remaining decisions before implementation
+
+1. **Prepare production deployment separately:** Define an HTTPS callback and host topology before enabling production sessions; the current callback remains fixed to the local prototype address.
+2. **Define player failure handling:** Distinguish an unavailable candidate from blocked autoplay, decide bounded skip behavior, and verify actual video/audio playback with the official visible player. Availability on YouTube or in Discogs metadata is insufficient.
+3. **Review provider constraints:** Confirm current Discogs and YouTube terms, attribution, metadata/image usage, and quota handling before product integration. The sampled presence of cover metadata does not establish image delivery or usage rights.
+4. **Specify the next product slice:** Use the agreed decisions and observed limits without promising 20 playable items or a response time. Radio UI, queue state, and replenishment remain future work; the backend session slice is implemented and has passed independent functional verification within this backend-only prototype scope.
 
 OAuth connection is required for Discogs reads; no wantlist operations, persistent cache, additional playback provider, deployment topology, or further product features have been decided here.
